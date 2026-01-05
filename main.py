@@ -11,7 +11,7 @@ def read_input(path="input.txt"):
         lines = [line.strip() for line in f.readlines() if line.strip() != ""]
     number_algo = int(lines[0]) #Number of the algorithm
     n = int(lines[1]) #Size of the board
-    nums = re.findall(r'-?\d+', lines[2])
+    nums = lines[2].split('-')
     board = tuple(int(x) for x in nums) #The board
     return number_algo, n, board
 
