@@ -39,7 +39,7 @@ def solve(start_state, n):
         # Define the goal state
         goal_state = tuple(range(1,n*n)) + (0,)
         s_start =State(board=start_state, parent_index=None, operator=None)
-       # Initialize the BFS queue and visited set
+       # Initialize the BFS queue and visited list
         queue = [s_start]
         visited = list()
         solution = []
@@ -58,11 +58,7 @@ def solve(start_state, n):
             
             # Generate neighbors
             for neighbor in get_neighbors(cur_state.board, n,len(visited)-1):
-                for v in visited:
-                    if neighbor.board==v.board:
-                        break
-                else:
+                if neighbor.board not in {state.board for state in visited} :
                     queue.append(neighbor)   
 
-       
         return solution 
