@@ -1,8 +1,7 @@
+# IDS: Iterative Deepening Search
+# Runs depth-limited DFS with depth_limit = 0,1,2,... until solution is found
 def solve(start_state, n):
-    """
-    IDS (Iterative Deepening Search)
-    Returns a string of moves using 'U','D','L','R'
-    """
+    
     #Builds a goal board
     goal = tuple(list(range(1, n * n)) + [0])
 
@@ -10,98 +9,86 @@ def solve(start_state, n):
     if start_state == goal:
         return ""
 
+    #maximum depth limit 
     depth_limit = 0
     while True:
         close_list = set()
 
-        # OPEN list concept for DFS = current path (to avoid loops)
-        path_set = {start_state}
-
-        # Run depth-limited DFS
-        result = _dls(start_state, n, goal, depth_limit, "", path_set, close_list)
-
-        # If found a solution, return it
+        # OPEN list 
+        open_list = {start_state}
+        result = _dls(start_state, n, goal, depth_limit, "", open_list, close_list)
+        # if found a solution, return it,else try deeper
         if result is not None:
             return result
-
-        # Otherwise, try deeper
         depth_limit += 1
 
+# opened = states in the current DFS path (OPEN)
+# closed = states expanded in this depth iteration (CLOSE)
+# Depth-Limited Search
+def _dls(state, n, goal, limit, path, opened, closed):
 
-def _dls(state, n, goal, limit, path, path_set, closed):
-    """
-    Depth-Limited Search (DFS with depth limit)
-    Returns path string if found, else None
-    """
-
-    # A) Goal test
+    # Goal test
     if state == goal:
         return path
 
-    # B) If no depth left, stop
+    #If no depth left, stop
     if limit == 0:
         return None
 
-    # C) Mark this node as expanded in this iteration (CLOSE)
     closed.add(state)
 
-    # D) Expand children in REQUIRED order: U, D, L, R
-    for next_state, move_char in _successors_udlr(state, n):
+    #Expand children in REQUIRED order: U, D, L, R
+    for next_state, move_char in _udlr_moves(state, n):
 
-        # Requirement: if child is in OPEN or CLOSE -> do not insert
-        if next_state in path_set or next_state in closed:
+        #if child is in OPEN or CLOSE ->no insert
+        if next_state in opened or next_state in closed:
             continue
 
-        # Add to current path (OPEN)
-        path_set.add(next_state)
+        opened.add(next_state)
 
         # Recurse deeper with limit-1, and append move char to path
-        res = _dls(next_state, n, goal, limit - 1, path + move_char, path_set, closed)
+        res = _dls(next_state, n, goal, limit - 1, path + move_char, opened, closed)
         if res is not None:
             return res
 
-        # Backtrack: remove from current path
-        path_set.remove(next_state)
+        #remove from current path
+        opened.remove(next_state)
 
-    # No solution found within this subtree at this limit
+    # No solution 
     return None
 
-
-def _successors_udlr(board, n):
-    """
-    Generate successors in the required order:
-    Up, Down, Left, Right  (U, D, L, R)
-    Returns list of (new_board, move_char)
-    """
-
+# Generates all legal moves of the blank tile (0)
+# Returns successor board states with their move labels in U, D, L, R order
+def _udlr_moves(board, n):
+   
     successors = []
-
+    # Find the index of 0
     zero_index = board.index(0)
     row = zero_index // n
     col = zero_index % n
 
-    # U: swap 0 with tile above
+    # U: If 0 is not on the top row → up.
     if row > 0:
         swap_index = zero_index - n
         new_board = list(board)
         new_board[zero_index], new_board[swap_index] = new_board[swap_index], new_board[zero_index]
         successors.append((tuple(new_board), "U"))
 
-    # D: swap 0 with tile below
+    # D: If 0 is not on the bottom row → down.
     if row < n - 1:
         swap_index = zero_index + n
         new_board = list(board)
         new_board[zero_index], new_board[swap_index] = new_board[swap_index], new_board[zero_index]
         successors.append((tuple(new_board), "D"))
 
-    # L: swap 0 with tile to the left
+    # L: If 0 is not on the left column → left.
     if col > 0:
         swap_index = zero_index - 1
         new_board = list(board)
         new_board[zero_index], new_board[swap_index] = new_board[swap_index], new_board[zero_index]
         successors.append((tuple(new_board), "L"))
 
-    # R: swap 0 with tile to the right
+    # R: If 0 is not on the right column → right
     if col < n - 1:
         swap_index = zero_index + 1
         new_board = list(board)
