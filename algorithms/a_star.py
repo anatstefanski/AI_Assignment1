@@ -1,23 +1,14 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple, List, Dict
 import heapq
-
-
-# -------------------------------------------------
-# State definition
-# -------------------------------------------------
 @dataclass
 class State:
     board: Tuple[int, ...]
-    parent_index: Optional[int]   # index of parent in visited list
-    operator: Optional[str]       # 'U', 'D', 'L', 'R' (movement of the EMPTY tile)
-    g: int                        # cost so far
-    f: int                        # g + h
+    parent_index: Optional[int]   
+    operator: Optional[str]       
+    g: int                        
+    f: int                        
 
-
-# -------------------------------------------------
-# Manhattan heuristic
-# -------------------------------------------------
 def manhattan(board: Tuple[int, ...], n: int, goal_pos: Dict[int, int]) -> int:
     dist = 0
     for i, v in enumerate(board):
@@ -30,10 +21,7 @@ def manhattan(board: Tuple[int, ...], n: int, goal_pos: Dict[int, int]) -> int:
     return dist
 
 
-# -------------------------------------------------
-# Generate neighbors in U, D, L, R order
-# The operator describes the movement of the EMPTY tile (0)
-# -------------------------------------------------
+
 def get_neighbors(
     board: Tuple[int, ...],
     n: int,
@@ -46,7 +34,7 @@ def get_neighbors(
     zero_index = board.index(0)
     zr, zc = divmod(zero_index, n)
 
-    # --- tile below moves UP -> empty moves DOWN ---
+   
     if zr < n - 1:
         nb = list(board)
         idx = (zr + 1) * n + zc
@@ -55,7 +43,7 @@ def get_neighbors(
         h = manhattan(nb_t, n, goal_pos)
         neighbors.append(State(nb_t, parent_index, 'D', g + 1, g + 1 + h))
 
-    # --- tile above moves DOWN -> empty moves UP ---
+
     if zr > 0:
         nb = list(board)
         idx = (zr - 1) * n + zc
@@ -64,7 +52,7 @@ def get_neighbors(
         h = manhattan(nb_t, n, goal_pos)
         neighbors.append(State(nb_t, parent_index, 'U', g + 1, g + 1 + h))
 
-    # --- tile right moves LEFT -> empty moves RIGHT ---
+
     if zc < n - 1:
         nb = list(board)
         idx = zr * n + (zc + 1)
@@ -73,7 +61,7 @@ def get_neighbors(
         h = manhattan(nb_t, n, goal_pos)
         neighbors.append(State(nb_t, parent_index, 'R', g + 1, g + 1 + h))
 
-    # --- tile left moves RIGHT -> empty moves LEFT ---
+ 
     if zc > 0:
         nb = list(board)
         idx = zr * n + (zc - 1)
@@ -85,9 +73,7 @@ def get_neighbors(
     return neighbors
 
 
-# -------------------------------------------------
-# A* solver
-# -------------------------------------------------
+
 def solve(start_state, n):
     start = tuple(start_state)
     goal = tuple(range(1, n * n)) + (0,)
@@ -95,7 +81,7 @@ def solve(start_state, n):
     if start == goal:
         return ""
 
-    # Pre-compute goal positions for Manhattan
+
     goal_pos = {v: i for i, v in enumerate(goal)}
 
     open_heap = []
@@ -103,7 +89,6 @@ def solve(start_state, n):
     open_best: Dict[Tuple[int, ...], int] = {}
     closed = set()
 
-    # Counter for tie-breaking (creation time)
     counter = 0
 
     h0 = manhattan(start, n, goal_pos)
@@ -122,7 +107,7 @@ def solve(start_state, n):
         visited.append(current)
         cur_index = len(visited) - 1
 
-        # Goal check
+    
         if current.board == goal:
             path = []
             while current.parent_index is not None:
