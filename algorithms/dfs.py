@@ -11,25 +11,39 @@ class State:
 def get_neighbors(board: Tuple[int, ...], n: int, parent_index: int) :
     neighbors = []
     zero_index = board.index(0) #Find the index of the empty tile (0)
-#up
-    if 0<= zero_index - n:
-        new_board = list(board)
-        new_board[zero_index], new_board[zero_index - n] = new_board[zero_index - n], new_board[zero_index]
-        neighbors.append(State(tuple(new_board), parent_index, "U"))
-#down
+    # up
     if zero_index + n < len(board):
         new_board = list(board)
-        new_board[zero_index], new_board[zero_index + n] = new_board[zero_index + n], new_board[zero_index]
+        new_board[zero_index], new_board[zero_index + n] = (
+            new_board[zero_index + n],
+            new_board[zero_index],
+        )
+        neighbors.append(State(tuple(new_board), parent_index, "U"))
+
+    # down
+    if zero_index - n >= 0:
+        new_board = list(board)
+        new_board[zero_index], new_board[zero_index - n] = (
+            new_board[zero_index - n],
+            new_board[zero_index],
+        )
         neighbors.append(State(tuple(new_board), parent_index, "D"))
-#left
-    if 0 <= zero_index - 1 and zero_index % n != 0 :
+
+    # left
+    if zero_index % n != n - 1:
         new_board = list(board)
-        new_board[zero_index], new_board[zero_index - 1] = new_board[zero_index - 1], new_board[zero_index]
+        new_board[zero_index], new_board[zero_index + 1] = (
+            new_board[zero_index + 1],
+            new_board[zero_index],
+        )
         neighbors.append(State(tuple(new_board), parent_index, "L"))
-#right
-    if (zero_index + 1) < len(board) and zero_index % n != n-1:
+    # right
+    if zero_index % n != 0:
         new_board = list(board)
-        new_board[zero_index], new_board[zero_index + 1] = new_board[zero_index + 1], new_board[zero_index]
+        new_board[zero_index], new_board[zero_index - 1] = (
+            new_board[zero_index - 1],
+            new_board[zero_index],
+        )
         neighbors.append(State(tuple(new_board), parent_index, "R"))
 
     return neighbors
@@ -40,7 +54,7 @@ def solve(start_state, n):
     goal_state = tuple(range(1,n*n)) + (0,)
     cur_state =State(board=start_state, parent_index=None, operator=None)
     # Initialize the DFS visited list
-    visited = list()
+    visited = list() #closed list
     solution = []
     
 
