@@ -1,14 +1,19 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple, List, Dict
 import heapq
+
+
+# Represents a state in the A* search tree
 @dataclass
 class State:
     board: Tuple[int, ...]
-    parent_index: Optional[int]   
-    operator: Optional[str]       
-    g: int                        
-    f: int                        
+    parent_index: Optional[int]
+    operator: Optional[str]
+    g: int
+    f: int
 
+
+# Computes Manhattan distance heuristic for a given board
 def manhattan(board: Tuple[int, ...], n: int, goal_pos: Dict[int, int]) -> int:
     dist = 0
     for i, v in enumerate(board):
@@ -21,7 +26,7 @@ def manhattan(board: Tuple[int, ...], n: int, goal_pos: Dict[int, int]) -> int:
     return dist
 
 
-
+# Generates neighbor states according to tile movement into the empty cell
 def get_neighbors(
     board: Tuple[int, ...],
     n: int,
@@ -34,53 +39,52 @@ def get_neighbors(
     zero_index = board.index(0)
     zr, zc = divmod(zero_index, n)
 
-   
+    # Tile below moves up into the empty cell
     if zr < n - 1:
         nb = list(board)
-        idx = (zr + 1) * n + zc
-        nb[zero_index], nb[idx] = nb[idx], nb[zero_index]
-        nb_t = tuple(nb)
-        h = manhattan(nb_t, n, goal_pos)
-        neighbors.append(State(nb_t, parent_index, 'D', g + 1, g + 1 + h))
-
-
-    if zr > 0:
-        nb = list(board)
-        idx = (zr - 1) * n + zc
-        nb[zero_index], nb[idx] = nb[idx], nb[zero_index]
+        tile_idx = (zr + 1) * n + zc
+        nb[zero_index], nb[tile_idx] = nb[tile_idx], nb[zero_index]
         nb_t = tuple(nb)
         h = manhattan(nb_t, n, goal_pos)
         neighbors.append(State(nb_t, parent_index, 'U', g + 1, g + 1 + h))
 
-
-    if zc < n - 1:
+    # Tile above moves down into the empty cell
+    if zr > 0:
         nb = list(board)
-        idx = zr * n + (zc + 1)
-        nb[zero_index], nb[idx] = nb[idx], nb[zero_index]
+        tile_idx = (zr - 1) * n + zc
+        nb[zero_index], nb[tile_idx] = nb[tile_idx], nb[zero_index]
         nb_t = tuple(nb)
         h = manhattan(nb_t, n, goal_pos)
-        neighbors.append(State(nb_t, parent_index, 'R', g + 1, g + 1 + h))
+        neighbors.append(State(nb_t, parent_index, 'D', g + 1, g + 1 + h))
 
- 
-    if zc > 0:
+    # Tile on the right moves left into the empty cell
+    if zc < n - 1:
         nb = list(board)
-        idx = zr * n + (zc - 1)
-        nb[zero_index], nb[idx] = nb[idx], nb[zero_index]
+        tile_idx = zr * n + (zc + 1)
+        nb[zero_index], nb[tile_idx] = nb[tile_idx], nb[zero_index]
         nb_t = tuple(nb)
         h = manhattan(nb_t, n, goal_pos)
         neighbors.append(State(nb_t, parent_index, 'L', g + 1, g + 1 + h))
 
+    # Tile on the left moves right into the empty cell
+    if zc > 0:
+        nb = list(board)
+        tile_idx = zr * n + (zc - 1)
+        nb[zero_index], nb[tile_idx] = nb[tile_idx], nb[zero_index]
+        nb_t = tuple(nb)
+        h = manhattan(nb_t, n, goal_pos)
+        neighbors.append(State(nb_t, parent_index, 'R', g + 1, g + 1 + h))
+
     return neighbors
 
 
-
+# Solves the puzzle using the A* search algorithm
 def solve(start_state, n):
     start = tuple(start_state)
     goal = tuple(range(1, n * n)) + (0,)
 
     if start == goal:
         return ""
-
 
     goal_pos = {v: i for i, v in enumerate(goal)}
 
@@ -107,7 +111,7 @@ def solve(start_state, n):
         visited.append(current)
         cur_index = len(visited) - 1
 
-    
+        # Goal state reached – reconstruct path
         if current.board == goal:
             path = []
             while current.parent_index is not None:
